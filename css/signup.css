@@ -35,7 +35,7 @@
   margin-bottom: 24px;
 }
 
-#quicklogin_container>h3{
+#quicklogin_container>.quickLogin_title{
   line-height: 74px;
   font-weight: 400;
   font-size: 16px;

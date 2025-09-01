@@ -21,9 +21,8 @@ document.addEventListener("DOMContentLoaded", function() {
   const submitButton = document.querySelector(
     '.auth_container form button[type="submit"]'
   );
-
-  // 페이지 로드 시 제출 버튼의 비활성화 상태를 설정
-  updateSubmitButtonState();
+  // // 페이지 로드 시 제출 버튼의 비활성화 상태를 설정
+  // updateSubmitButtonState();
 
   if (loginForm) {
     loginForm.addEventListener("submit", function (event) {
@@ -35,13 +34,15 @@ document.addEventListener("DOMContentLoaded", function() {
   if (signupForm) {
     signupForm.addEventListener("submit", function (event) {
       event.preventDefault();
-      window.location.href = "signup.html";
+      window.location.href = "login.html";
     });
   }
 
-  function showError(input, errorId) {
+  function showError(input, errorId, message, errorClass = "error-message") {
     const errorElement = document.getElementById(errorId);
     if (errorElement) {
+      errorElement.textContent = message;
+      errorElement.className = errorClass;
       errorElement.style.display = "block";
     }
     if (input) {
@@ -49,10 +50,11 @@ document.addEventListener("DOMContentLoaded", function() {
     }
   }
 
-  function hideError(input, errorId) {
-    const errorElement = document.getElementById(errorId);
+  function hideError(input, errorSpanId) {
+    const errorElement = document.getElementById(errorSpanId);
     if (errorElement) {
-    errorElement.style.display = "none";
+      errorElement.textContent = "";
+      errorElement.style.display = "none";
     }
     if (input) {
       input.style.border = "none";
@@ -76,36 +78,30 @@ document.addEventListener("DOMContentLoaded", function() {
     // trim() 메서드는 문자열의 앞뒤 공백을 제거
 
     isEmailValid = false;
-    // 기존 오류 메세지 숨기기
-    hideError(emailInput, "emailEmptyError");
-    hideError(emailInput, "emailInvalidError");
+    hideError(emailInput, "emailError");
 
     if (!emailValue) {
-      showError(emailInput, "emailEmptyError");
+      showError(emailInput, "emailError", "이메일을 입력해 주세요.");
     } else if (!validateEmail(emailValue)) {
-      showError(emailInput, "emailInvalidError");
+      showError(emailInput, "emailError", "이메일 형식이 올바르지 않습니다.");
     } else {
       isEmailValid = true;
-      hideError(emailInput, "emailEmptyError");
-      hideError(emailInput, "emailInvalidError");
+      hideError(emailInput, "emailError");
     }
-    //어느 순서로 오류가 발생하든, 마지막에 isEmailValid 상태에 따라 제출 버튼 활성화 여부를 업데이트
-    updateSubmitButtonState();
   }
 
   // 닉네임 필드의 유효성 검사
   function checkNicknameValidity() {
     const nicknameValue = nicknameInput.value.trim();
     isNicknameValid = false;
-    hideError(nicknameInput, "nicknameEmptyError");
+    hideError(nicknameInput, "nicknameError");
 
     if (!nicknameValue) {
-      showError(nicknameInput, "nicknameEmptyError");
+      showError(nicknameInput, "nicknameError", "닉네임을 입력해 주세요.");
     } else {
       isNicknameValid = true;
-      hideError(nicknameInput, "nicknameEmptyError");
+      hideError(nicknameInput, "nicknameError");
     }
-    updateSubmitButtonState();
   }
 
   // 비밀번호 필드의 유효성 검사
@@ -113,24 +109,18 @@ document.addEventListener("DOMContentLoaded", function() {
     const passwordValue = passwordInput.value.trim();
     isPasswordValid = false;
 
-    hideError(passwordInput, "passwordEmptyError");
-    hideError(passwordInput, "passwordInvalidError");
+    hideError(passwordInput, "passwordError");
 
     if (!passwordValue) {
-      showError(passwordInput, "passwordEmptyError");
+      showError(passwordInput, "passwordError", "비밀번호를 입력해 주세요.");
     } else if (passwordValue.length < 8) {
-      showError(passwordInput, "passwordInvalidError");
+      showError(passwordInput, "passwordError", "비밀번호는 8자 이상이어야 합니다.");
     } else {
       isPasswordValid = true;
-      hideError(passwordInput, "passwordEmptyError");
-      hideError(passwordInput, "passwordInvalidError");
+      hideError(passwordInput, "passwordError");
     }
-    updateSubmitButtonState();
 
     if (signupForm) {
-      // 비밀번호가 변경될 때마다 비밀번호 확인 필드의 유효성도 재검사
-      // - 사용자가 비밀번호를 수정한 후에 비밀번호 확인 필드가 이전 비밀번호와 일치하는지 확인하기 위해
-      // - 비밀번호 확인 필드의 유효성 검사를 호출하여 즉각적인 피드백 제공
       checkPasswordConfirmationValidity();
     }
   }
@@ -141,23 +131,18 @@ document.addEventListener("DOMContentLoaded", function() {
     isPasswordConfirmationValid = false;
 
     hideError(passwordConfirmationInput, "passwordConfirmationError");
-    hideError(passwordConfirmationInput, "passwordConfirmationEmptyError");
 
     if (!isPasswordValid) {
-      showError(passwordConfirmationInput, "passwordConfirmationEmptyError");
+      showError(passwordConfirmationInput, "passwordConfirmationError", "비밀번호를 입력해 주세요.");
     } else if (
       !passwordConfirmationValue ||
       passwordConfirmationValue !== passwordInput.value.trim()
-      //trim() 메서드를 사용하여 공백을 제거한 후 비교
-      // - 사용자가 비밀번호 필드에 공백을 포함한 값을 입력했을 때도 정확히 비교하기 위해
     ) {
-      showError(passwordConfirmationInput, "passwordConfirmationError");
+      showError(passwordConfirmationInput, "passwordConfirmationError", "비밀번호가 일치하지 않습니다.");
     } else {
       isPasswordConfirmationValid = true;
       hideError(passwordConfirmationInput, "passwordConfirmationError");
-      hideError(passwordConfirmationInput, "passwordConfirmationEmptyError");
     }
-    updateSubmitButtonState();
   }
 
   function updateSubmitButtonState() {
@@ -171,20 +156,32 @@ document.addEventListener("DOMContentLoaded", function() {
     submitButton.disabled = !isFormValid;
     submitButton.style.cursor = isFormValid ? "pointer" : "not-allowed";
   }
+  
 
   // 입력 필드에 이벤트 리스너 추가
   if (emailInput) {
-    // - 입력 필드 선택 후 focusout 했을 때 각 필드에 해당하는 유효성 검증 함수를 호출
-    emailInput.addEventListener("focusout", checkEmailValidity);
+    emailInput.addEventListener("focusout", function() {
+      checkEmailValidity();
+      updateSubmitButtonState();
+    });
   }
   if (nicknameInput) {
-    nicknameInput.addEventListener("focusout", checkNicknameValidity);
+    nicknameInput.addEventListener("focusout", function() {
+      checkNicknameValidity();
+      updateSubmitButtonState();
+    });
   }
   if (passwordInput) {
-    passwordInput.addEventListener("input", checkPasswordValidity);
+    passwordInput.addEventListener("input", function() {
+      checkPasswordValidity();
+      updateSubmitButtonState();
+    });
   }
   if (passwordConfirmationInput) {
-    passwordConfirmationInput.addEventListener("input", checkPasswordConfirmationValidity);
+    passwordConfirmationInput.addEventListener("input", function() {
+      checkPasswordConfirmationValidity();
+      updateSubmitButtonState();
+    });
   }
 
   // toggle 버튼 동작

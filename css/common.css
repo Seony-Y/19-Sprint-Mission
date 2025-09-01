@@ -55,7 +55,7 @@ footer {
   gap: 60px 36px;
 }
 
-#copyright {
+.copyright {
   order: 3;
   flex-basis: 100%;
   color: var(--secondary-400);
